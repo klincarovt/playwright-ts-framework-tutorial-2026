@@ -1,9 +1,14 @@
 # Progress — Claude's mentor log
 
 > **↩ RESUME HERE**
-> - **Current:** Day 3/5 · ESLint `no-floating-promises` setup (agreed), then Step 3: custom fixture (`test.extend`)
+> - **Current:** Day 3/5 · Step 3: custom fixture (`test.extend`). ESLint done; first commit **pushed** to GitHub.
+> - **Repo:** `github.com/klincarovt/playwright-ts-framework-tutorial-2026` (remote `origin`, branch `main`). Pushed from **Windows git** (WSL git has no credentials yet → `gh auth login` or the Windows credential helper). Check WSL `git status` for CRLF noise.
+> - **CI:** the workflow ran on push and is expected to fail (no `.env` in CI) → GitHub Secrets on Day 4. Ask JoJo what the Actions tab shows.
 > - **Watch on Day 3:** re-test isolation (the context-per-test weak spot) when introducing storageState; Claude can't read `.env` (sandbox), so ask JoJo to confirm the variable names instead.
-> - **Last session:** 2026-11-15 (docs reorganized, MCP servers added, Day 2 Step 1 done)
+> - **Last session:** 2026-11-16 (Day 3 Steps 0–2, ESLint, git init + first push). Wrap-up done.
+> - **Practice backlog:** `docs/me/Practice Cases.md` (5 levels, ~30 cases) for solo work between sessions. JoJo wants repetition to make it stick for interviews. Review his solo cases at the start of sessions; hints at level 1 only.
+> - **README.md** created (badges, features, roadmap, structure, how to run). Keep the roadmap ticks honest as days complete.
+> - **⚠️ JoJo said "not sure if I'm learning".** Next session: start with a 5-min **no-notes recall** (await rule, POM vs test responsibilities, isolation, failure categories); have him write Step 3 code **before** any skeleton; insist on check questions (he often skips them). Ask what feels off.
 
 Plan: [Interview Plan](../Interview%20Plan.md) · Changelog: [framework-changelog.md](./framework-changelog.md) · JoJo's notes: `docs/me/` (updated only at session wrap-up)
 

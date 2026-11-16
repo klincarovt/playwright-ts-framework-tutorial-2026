@@ -40,7 +40,30 @@ claude mcp add typescript npx ts-language-mcp /mnt/code/TypeScript/playwright-ts
 
 **Useful commands:** `claude mcp list`, `claude mcp remove <name>`, and `/mcp` inside a session to see their status.
 
+## Commands and shortcuts
+| What | How |
+| --- | --- |
+| Quit Claude Code | `/exit` or `Ctrl+C` twice (`!exit` does nothing) |
+| Run a shell command from Claude | `! <command>`: output lands in the chat |
+| Clear the conversation | `/clear` (`Ctrl+L` = just the screen) |
+| Stop vs pause a program in the terminal | `Ctrl+C` stops ✅ · `Ctrl+Z` **pauses** (it keeps its port) → `jobs`, `kill %1` |
+
+## Themes
+- `/theme` → built-in themes (dark, light, colorblind, ANSI) **and custom themes**.
+- Custom theme file: `~/.claude/themes/<name>.json` → `{ "name", "base": "dark", "overrides": { "text": "rgb(…)", "claude": "rgb(…)", … } }`
+  - `text` = my reply text, `claude` = the spinner (✻ Thinking…), `diff*` = edit colors, `*Background` = message blocks.
+- Claude's theme only changes **accents**. The background and font belong to the **terminal** (Windows Terminal → Settings `Ctrl+,`).
+- ⚠️ When letters went missing, it was the **terminal settings** (font / line height), not the Claude theme. Revert there first.
+- My terminal scheme backup: `docs/me/JoJo Calm theme.json`.
+
+## VS Code
+- Format document: `Shift+Alt+F` (Windows) / `Ctrl+Shift+I` (Linux). Rebind to `Ctrl+Alt+L` via `Ctrl+K Ctrl+S`, or install **IntelliJ IDEA Keybindings**.
+- Useful extensions: **Playwright Test for VSCode**, **ESLint**, **Prettier**, **Error Lens**, **WSL**.
+- Open from WSL with `code .`.
+
 ## How I work with Claude here
+- Claude reads `CLAUDE.md` automatically every session: the project rules live there. If it gets emptied, ask Claude to restore it.
+- Say **"log it"** to save something to my notes right away.
 
 - I write the code and run the commands. Claude hints, reviews and keeps the docs.
 - Say **"wrap up"** at the end of a session, and Claude updates my notes in `docs/me/`.

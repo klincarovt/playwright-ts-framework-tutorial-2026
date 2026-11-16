@@ -4,6 +4,16 @@ Every change to the framework: config, tests, structure, tooling. Newest first. 
 
 ---
 
+## 2026-11-16 · First push to GitHub
+
+- Repo: `github.com/klincarovt/playwright-ts-framework-tutorial-2026`, branch `main`, remote `origin`.
+- One combined first commit covering Days 1–3 (setup, login-search test, env config, page objects, ESLint, docs).
+- Pushed from Windows git (Git Credential Manager). WSL git needs `gh auth login` or the Windows credential helper.
+- GitHub Actions ran `.github/workflows/playwright.yml` on push. Expected to fail until `USER_EMAIL` / `USER_PASSWORD` / `BASEURL` are added as **GitHub Secrets** (Day 4).
+- From now on: one commit per step.
+
+---
+
 ## 2026-11-16 · Day 3: page objects + ESLint
 
 - `pages/LoginPage.ts`: locator fields (email, password, login button), `goToPage()`, `performUserLogin(email, password)`.

@@ -4,9 +4,10 @@
 **Then I can say:** "I can design a maintainable framework."
 
 ## Steps
-- [ ] 0. Move credentials out of the test: `.env` + `dotenv`, add `.env` to `.gitignore`
-- [ ] 1. First page object: `LoginPage` (locators + `login()` method)
-- [ ] 2. Second page object: `SearchPage` (search + results)
+- [x] 0. Move credentials out of the test: `.env` + `dotenv`, add `.env` to `.gitignore`
+- [x] 1. First page object: `LoginPage` (locators + `login()` method)
+- [x] 2. Second page object: `SearchPage` (search + results)
+- [x] Extra: ESLint `no-floating-promises`, git init, first push to GitHub
 - [ ] 3. Custom fixture: `test.extend` injects the page objects into tests
 - [ ] 4. Setup project: log in once, save `storageState` to a file
 - [ ] 5. Tests reuse `storageState` (no UI login per test); explain the framework layers
@@ -55,8 +56,53 @@
 
 > **Interview:** "Secrets live in a gitignored `.env` locally and in GitHub Secrets in CI. If a secret is ever committed, deleting it isn't enough: it's in the history, so I rotate it."
 
+### Page objects (POM)
+```ts
+export class LoginPage {
+    readonly emailInput: Locator;                       // locators = readonly fields
+    constructor(private readonly page: Page) {          // TS shortcut: declares + assigns this.page
+        this.emailInput = page.getByLabel('email');     // no await: locators are lazy
+    }
+    async performUserLogin(email: string, password: string) {   // credentials passed IN
+        await this.emailInput.fill(email);              // await every action
+    }
+}
+```
+| Goes in the page object | Goes in the test |
+| --- | --- |
+| `getBy…` locators, actions (`login`, `search`) | `expect(...)` assertions, which user/data |
+
+- `const loginPage = new LoginPage(page);` borrows the test's `page` (same isolated context).
+- **No BasePage** yet: Playwright already auto-waits, so it'd be empty. Use composition (NavBar component) + fixtures. Add one only when real duplication appears (YAGNI).
+- Constructors can't be `async` → never `goto` in a constructor.
+- Plural names for multi-element locators: `productNames`.
+- The field name is mine (camelCase); the test-id string must match the HTML exactly (`product-name`).
+- `process.env.X!`: `!` silences `string | undefined` (no runtime check).
+
+### The await rule
+- Calling **anything `async`** (Playwright's or **my own** methods) → `await` it.
+- No await: `new X()`, `const loc = page.getBy…`.
+- **ESLint catches it:** `npm run lint` → `57:5 error … no-floating-promises` (line 57, column 5). Silent = clean.
+
+### Tooling added
+| File | Purpose |
+| --- | --- |
+| `tsconfig.json` | TypeScript settings (strict, commonjs, esModuleInterop) |
+| `eslint.config.mjs` | ESLint with one rule: `no-floating-promises` |
+| `package.json` script | `"lint": "eslint ."` |
+
+- `npm audit` warning: moderate, dev-only, fix = breaking downgrade → **don't** `--force`. Judge: dev vs runtime, reachable?, fix risk.
+- Stack traces: the **first** `file:line:col` points at my code (`eslint.config.mjs:15:3` → a stray `npm` in the file).
+
+### GitHub push
+- `git remote add origin <url>` → `git push -u origin main` (`-u` links the branch once).
+- "src refspec main does not match any" = **no commits yet**.
+- GitHub rejects passwords → token via `gh auth login` (WSL) or Git Credential Manager (Windows git).
+- Identity (`user.name`/`email`) = a label on commits. Authentication (token) = permission to push.
+- Repo name ≠ folder name. Only the remote URL links them.
+
 ## "I can now say…"
--
+- "I build page objects with locator fields and intent-level methods, keep assertions in tests, and enforce `await` with ESLint."
 
 ## My notes
 -
