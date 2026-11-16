@@ -1,0 +1,23 @@
+{
+  "name": "JoJo Calm",
+  "background": "#1B1F2A",
+  "foreground": "#DFE3EC",
+  "cursorColor": "#F2C879",
+  "selectionBackground": "#3A4560",
+  "black": "#2A2F3D",
+  "red": "#EF7F7F",
+  "green": "#9FD49A",
+  "yellow": "#F2C879",
+  "blue": "#82AAF0",
+  "purple": "#C4A3F0",
+  "cyan": "#7FD3D6",
+  "white": "#C9CFDB",
+  "brightBlack": "#7B8499",
+  "brightRed": "#FF9A9A",
+  "brightGreen": "#B6E3B0",
+  "brightYellow": "#FFD99A",
+  "brightBlue": "#A3C2FF",
+  "brightPurple": "#D7BDFF",
+  "brightCyan": "#A0E6E8",
+  "brightWhite": "#F5F7FB"
+}
