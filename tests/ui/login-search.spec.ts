@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage';
-import { SearchPage } from '../pages/SearchPage';
+import { LoginPage } from '../../pages/LoginPage';
+import { SearchPage } from '../../pages/SearchPage';
 
 test('customer finds products when searching "pliers" (old: no fixtures)', async ({ page }) => {
 

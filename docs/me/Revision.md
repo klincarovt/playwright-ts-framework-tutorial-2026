@@ -480,3 +480,19 @@ The opposite risk is real: an old `user.json` can hold an **expired** token → 
 
 Opt that spec out of the saved login: `test.use({ storageState: { cookies: [], origins: [] } });` → the test starts as a brand-new visitor and really exercises the login form. Otherwise it "logs in" on top of an existing login and proves nothing.
 </details>
+
+### 4.1 "Mocking is just asserting my own logic." True? 🟡 (good critical question)
+<details><summary>Answer</summary>
+
+Partly. The mock is the **input**; the **front end's behaviour** is under test (empty list → "no results", 500 → error banner).
+Bad: mocking the happy path and asserting the same data (tautology); mocks drifting from the real API (contract drift).
+Good: only edge cases you can't produce on demand + keep real API tests for the contract.
+Interview line: *"Mocks test how the UI handles responses I can't produce on demand; real API tests keep the mocks honest."*
+</details>
+
+### 4.2 Setup fails: "Account locked, too many failed attempts". Which category, and what's the long-term fix? ⬜
+<details><summary>Answer</summary>
+
+**Environment / test data** (code unchanged). Where to look: the page snapshot in `error-context.md` / trace.
+Short-term: switch demo user. Long-term: **dedicated test users** (per pipeline/worker, created via API), never shared accounts; avoid repeated failed logins in tests.
+</details>

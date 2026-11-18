@@ -4,6 +4,16 @@ Every change to the framework: config, tests, structure, tooling. Newest first. 
 
 ---
 
+## 2026-11-18 · Day 3 Step 4: storageState
+
+- `tests/auth.setup.ts`: logs in via the `loginPage` fixture, asserts `/account`, saves `page.context().storageState()` to `playwright/.auth/user.json` (gitignored).
+- `playwright.config.ts`: project `setupUser` (`testMatch: /.*\.setup\.ts/`); chromium/firefox/webkit get `storageState` + `dependencies: ['setupUser']`. `BaseURL` → `BASEURL` (case fix).
+- `tests/account.spec.ts`: opens `/account` directly; asserts `page-title` contains "My account" (`toHaveURL` alone passed without login → SPA redirect false positive). Proven both ways.
+- Test titles renamed to behaviour-style names.
+- Interview angle: "Log in once in a setup project; tests start from the saved state and stay isolated. I proved the test fails without the state."
+
+---
+
 ## 2026-11-18 · Day 3 Step 3: custom fixtures
 
 - `fixtures/fixtures.ts`: `base.extend<{ loginPage: LoginPage; searchPage: SearchPage }>` builds both page objects from the built-in `page` and hands them over with `use()`; re-exports `test` and `expect`.
