@@ -1,11 +1,11 @@
 # Progress — Claude's mentor log
 
 > **↩ RESUME HERE**
-> - **Current:** Day 4/5 · Step 1 (API tests). Day 3 ✅ done 2026-11-18 (fixtures + storageState pushed). Open from Day 3: delete `example.spec.ts` + old `login-search.spec.ts`; `test.use({ storageState: { cookies: [], origins: [] } })` in the login spec (suggested, not confirmed). Re-ask recall Q3 (isolation) + Q4 (triage) unannounced. Log every Q/term/decision in `docs/me/Revision.md` right away. JoJo said "you're wasting my time a bit" (long storageState proof loop) → keep it tighter.
-> - **Repo:** `github.com/klincarovt/playwright-ts-framework-tutorial-2026` (remote `origin`, branch `main`). Pushed from **Windows git** (WSL git has no credentials yet → `gh auth login` or the Windows credential helper). Check WSL `git status` for CRLF noise.
-> - **CI:** the workflow ran on push and is expected to fail (no `.env` in CI) → GitHub Secrets on Day 4. Ask JoJo what the Actions tab shows.
-> - **Watch on Day 3:** re-test isolation (the context-per-test weak spot) when introducing storageState; Claude can't read `.env` (sandbox), so ask JoJo to confirm the variable names instead.
-> - **Last session:** 2026-11-16 (Day 3 Steps 0–2, ESLint, git init + first push). Wrap-up done.
+> - **Current:** Day 4/5 · Step 5 (GitHub Actions): JoJo is pushing; **ask for the Actions result** (✅/❌ + failing step). Green CI = Day 4 done → then Day 5.
+> - **Open items (before/after the push):** `hybrid.spec.ts` has **no `test.use` empty storageState** (passes possibly via config login; told him 3×, dropped it); `playwright.yml` line `BASE_URL` = dead (config reads `BASEURL`); `.env` has `BaseURL` (mismatch, works via fallback); delete `example.spec.ts` + old `login-search.spec.ts`; remove `console.log(response)` in `tests/api/products.spec.ts`; firefox project commented out in config; `goToHomePage()` still clicks `nav-home` (mock spec works around it with `goto('')`). Unanswered check Qs: negative login API test; traces in a public CI artifact = secrets.
+> - **Repo:** `github.com/klincarovt/playwright-ts-framework-tutorial-2026` (remote `origin`, branch `main`). CI secrets live in a GitHub **Environment named `.env`** → workflow has `environment: .env`.
+> - **Re-ask unannounced:** recall Q3 (isolation) + Q4 (triage). Log every Q/term/decision in `docs/me/Revision.md` right away. JoJo said "you're wasting my time a bit" → keep it tight; he often pastes old output / forgets to save → check the file on disk first.
+> - **Last session:** 2026-11-17/18 (Day 3 Steps 3–4, Day 4 Steps 1–5).
 > - **Plan (JoJo has other interview prep too):** focus only on plan **Days 3–5**. Mini solo project + extra mock days dropped; practice cases optional (a few, if time). Keep sessions efficient: fewer detours, less tooling. Fold a short mock-interview round into Day 5.
 > - **Practice backlog:** `docs/me/Practice Cases.md` (5 levels, ~30 cases) for solo work between sessions. JoJo wants repetition to make it stick for interviews. Review his solo cases at the start of sessions; hints at level 1 only.
 > - **README.md** created (badges, features, roadmap, structure, how to run). Keep the roadmap ticks honest as days complete.
@@ -18,7 +18,7 @@ Plan: [Interview Plan](../Interview%20Plan.md) · Changelog: [framework-changelo
 | 1 | Setup, codegen login + search, run headed + UI mode | ✅ done (2026-11-12) |
 | 2 | Role locators, web-first assertions, `baseURL`, trace viewer | ✅ done (2026-11-15) |
 | 3 | 2 page objects + 1 custom fixture, `storageState` | ✅ done (2026-11-18) |
-| 4 | 2 API tests, 1 hybrid, 1 `page.route` mock, GitHub Actions | ⬜ |
+| 4 | 2 API tests, 1 hybrid, 1 `page.route` mock, GitHub Actions | 🟡 waiting for CI result (2026-11-18) |
 | 5 | Story, transfer map, cheat sheet out loud; Playwright MCP | ⬜ |
 
 ## Weak spots (all days)
@@ -112,3 +112,23 @@ Plan: [Interview Plan](../Interview%20Plan.md) · Changelog: [framework-changelo
 - `webServer` config = start your own app (not needed for a remote site)
 - POM in TS: parameter properties, readonly locator fields, lazy locators in the constructor, no async constructor; assertions in tests; no BasePage (YAGNI, composition)
 - `process.env.X` is `string | undefined` → `!` (quick) vs guard (fail fast)
+
+---
+
+## Day 4
+
+### Step log
+| Step | Result | Notes |
+| --- | --- | --- |
+| 1 | ✅ | `tests/api/products.spec.ts`: GET `/products/search?q=pliers`, status 200, `data.length`. Used `console.log(response)` to explore headers (good). Off-by-one `> 1` vs "at least one" → he questioned it (correct). Noticed: API test runs once per browser (wasted). |
+| 2 | ✅ | POST `/users/login` → `access_token` truthy. Setup failed in between: "Invalid email or password" (env, went away), later "Account locked" → switched demo user. Read the snapshot via error-context. `.env` has `BaseURL` (case mismatch, 3rd time). Negative-test check Q skipped. |
+| 3 | ✅ | `tests/hybrid/hybrid.spec.ts`: `request.fetch` POST login → `addInitScript` sets localStorage `auth-token` → `/account` title. Missing `);` once. Several runs with stale/unsaved file and identical pasted output. **Never added `test.use` empty storageState** → result not proven. Firefox project commented out. |
+| 4 | ✅ | Pushed back: "mock is stupid, asserting my own logic" → discussed (mock = input, UI reaction under test; tautology + contract drift risks; load/chaos tests for server resilience). `tests/mock/mock.spec.ts`: `page.route` → `{ data: [] }` → `toHaveCount(0)`. Timeout because the test started on a blank page (`goToHomePage` clicks a nav link; my snippet's fault) → he fixed it with `page.goto('')` in the spec. Proof runs skipped. |
+| 5 | 🟡 | Secrets: first one secret/Environment named `.env` → uses a GitHub **Environment** `.env` with `USER_EMAIL`/`USER_PASSWORD` + `environment: .env` in the job. Fixed empty `${{}}`. Pushing now. |
+
+### Concepts covered
+- `request` fixture (≈ REST Assured), GET/POST, `data` JSON body, `response.status()/json()`, destructuring
+- Hybrid: API for setup, UI for the check; `page.addInitScript` runs before the app's scripts
+- `page.route` + `route.fulfill`; when mocks are useful vs tautologies; contract drift
+- Shared demo accounts lock → dedicated test users
+- GitHub Actions workflow, runner, repository secrets vs environment secrets, `env:` per step, `??` doesn't catch `''`

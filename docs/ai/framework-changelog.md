@@ -4,6 +4,18 @@ Every change to the framework: config, tests, structure, tooling. Newest first. 
 
 ---
 
+## 2026-11-18 · Day 4: API, hybrid, mock, CI secrets
+
+- `tests/api/products.spec.ts`: GET product search (status + results) and POST login (token) with the `request` fixture.
+- `tests/hybrid/hybrid.spec.ts`: API login → token into localStorage via `page.addInitScript` → UI opens `/account`. Todo: `test.use({ storageState: { cookies: [], origins: [] } })` so the config login can't make it pass.
+- `tests/mock/mock.spec.ts`: `page.route('**/products/search*')` → `{ data: [] }` → no product names shown.
+- `tests/setup/auth.setup.ts` (moved into `tests/setup/`).
+- `playwright.config.ts`: firefox project commented out (faster runs).
+- `.github/workflows/playwright.yml`: branches `main` only; `environment: .env` (GitHub Environment holding `USER_EMAIL`, `USER_PASSWORD`); `env:` on the test step. Todo: remove the unused `BASE_URL` line.
+- Interview angle: "API tests for logic, hybrid for fast setup, mocks only for UI edge cases, all running in GitHub Actions with secrets."
+
+---
+
 ## 2026-11-18 · Day 3 Step 4: storageState
 
 - `tests/auth.setup.ts`: logs in via the `loginPage` fixture, asserts `/account`, saves `page.context().storageState()` to `playwright/.auth/user.json` (gitignored).

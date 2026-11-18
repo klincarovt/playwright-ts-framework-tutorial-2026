@@ -496,3 +496,10 @@ Interview line: *"Mocks test how the UI handles responses I can't produce on dem
 **Environment / test data** (code unchanged). Where to look: the page snapshot in `error-context.md` / trace.
 Short-term: switch demo user. Long-term: **dedicated test users** (per pipeline/worker, created via API), never shared accounts; avoid repeated failed logins in tests.
 </details>
+
+### 4.3 Setup passes, but tests start logged out. What do you check first? ❌ (spent a while on wrong guesses)
+<details><summary>Answer</summary>
+
+**Paths before theories.** Setup writes the file with `path.join(__dirname, ...)` = relative to the **setup file's folder**; the config reads relative to the **project root**. Moving `auth.setup.ts` into `tests/setup/` made it write to `tests/playwright/.auth/` → the tests loaded an **old** file.
+Also: `.gitignore` `/playwright/.auth/` (leading `/`) = root only → the new location was **not ignored**. Use `playwright/.auth/`.
+</details>
