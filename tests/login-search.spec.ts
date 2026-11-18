@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { SearchPage } from '../pages/SearchPage';
 
-test('customer can log in and search for pliers', async ({ page }) => {
+test('customer finds products when searching "pliers" (old: no fixtures)', async ({ page }) => {
 
   await test.step('open the shop', async () => {
 
@@ -21,7 +21,7 @@ test('customer can log in and search for pliers', async ({ page }) => {
   //
   // });
 
-  await test.step('Login to Store', async () => {
+  await test.step('log in', async () => {
     const loginPage: LoginPage = new LoginPage(page);
     await loginPage.goToPage();
     await loginPage.performUserLogin(
@@ -47,7 +47,7 @@ test('customer can log in and search for pliers', async ({ page }) => {
   //
   //    });
 
-  await test.step('Search for product by NAME: pliers', async () => {
+  await test.step('search for "pliers"', async () => {
     const searchPage: SearchPage = new SearchPage(page);
     await searchPage.goToHomePage();
     await searchPage.searchProductByName('pliers');

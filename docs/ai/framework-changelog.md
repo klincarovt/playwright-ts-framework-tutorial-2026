@@ -4,6 +4,16 @@ Every change to the framework: config, tests, structure, tooling. Newest first. 
 
 ---
 
+## 2026-11-18 · Day 3 Step 3: custom fixtures
+
+- `fixtures/fixtures.ts`: `base.extend<{ loginPage: LoginPage; searchPage: SearchPage }>` builds both page objects from the built-in `page` and hands them over with `use()`; re-exports `test` and `expect`.
+- `tests/login-search-fixtures.spec.ts` (new): imports from `../fixtures/fixtures`, asks for `{ page, loginPage, searchPage }`, no `new ...Page()`. `expect(page).toHaveURL('/account')` after login (race fix kept). Run: passed.
+- `tests/login-search.spec.ts` (old) kept for comparison → delete before the Day 4 push (duplicate coverage).
+- Why fixtures over `beforeEach`: reusable across files, created only on demand, typed, setup + teardown in one function, and the base for `storageState`.
+- Interview angle: "Fixtures are Playwright's dependency injection: the test declares what it needs; the fixture builds and cleans it up."
+
+---
+
 ## 2026-11-16 · First push to GitHub
 
 - Repo: `github.com/klincarovt/playwright-ts-framework-tutorial-2026`, branch `main`, remote `origin`.
