@@ -8,9 +8,9 @@
 - [x] 1. First page object: `LoginPage` (locators + `login()` method)
 - [x] 2. Second page object: `SearchPage` (search + results)
 - [x] Extra: ESLint `no-floating-promises`, git init, first push to GitHub
-- [ ] 3. Custom fixture: `test.extend` injects the page objects into tests
-- [ ] 4. Setup project: log in once, save `storageState` to a file
-- [ ] 5. Tests reuse `storageState` (no UI login per test); explain the framework layers
+- [x] 3. Custom fixture: `test.extend` injects the page objects into tests (2026-11-18)
+- [x] 4. Setup project: log in once, save `storageState` to a file
+- [x] 5. Tests reuse `storageState` (no UI login per test), proven both ways
 
 ## Before you start
 - Open Claude Code in this folder. It picks up from `docs/ai/progress.md` automatically.
@@ -101,8 +101,58 @@ export class LoginPage {
 - Identity (`user.name`/`email`) = a label on commits. Authentication (token) = permission to push.
 - Repo name ≠ folder name. Only the remote URL links them.
 
+### Fixtures (`fixtures/fixtures.ts`)
+```ts
+export const test = base.extend<{ loginPage: LoginPage; searchPage: SearchPage }>({
+  loginPage: async ({ page }, use) => {
+    await use(new LoginPage(page));   // before = setup, after = teardown
+  },
+});
+export { expect };
+```
+| Piece | Meaning |
+| --- | --- |
+| `test as base` | Rename the original so my version can be called `test` |
+| `extend<{...}>` | Adds my fixtures; `< >` tells TS their types |
+| `use(value)` | Hands the object to the test, waits until the test ends |
+| `{ page, loginPage }` in a test | Ask by **name** → Playwright injects it (dependency injection) |
+| Import in specs | Always `from '../fixtures/fixtures'`, never `@playwright/test` |
+
+- `page` is built-in and shared: my fixtures and the test get the **same tab**.
+- Fixture vs `beforeEach`: reusable across files, only built when asked for, typed, setup + teardown together.
+
+### storageState (log in once)
+```
+setupUser project (tests/setup/auth.setup.ts)
+  log in via UI → assert → page.context().storageState({ path }) → playwright/.auth/user.json
+        │ dependencies: ['setupUser']        │ storageState: 'playwright/.auth/user.json'
+        └────────── chromium / webkit ───────┘  (each test: fresh context, pre-filled)
+```
+| Config key | Meaning |
+| --- | --- |
+| `testMatch: /.*\.setup\.ts/` | The setup project runs only setup files |
+| `dependencies` | Order: wait for setup |
+| `storageState` | Data: start every context from the saved file |
+| `test.use({ storageState: { cookies: [], origins: [] } })` | Opt out → start logged out (login test, hybrid test) |
+
+- `user.json` = cookies + localStorage (here: `auth-token`) → **gitignored**, regenerated every run.
+- Isolation is kept: each test still gets its own context; it just *starts* from the same file.
+
+### Proving a test can fail
+- `goto('/account')` + `toHaveURL('/account')` passed **without** a login: in a SPA the URL is right first, the redirect comes later.
+- Fix: assert content only a logged-in user sees (`page-title` contains "My account").
+- Proof: run with storageState ✅, without ❌. *A green test only proves what it checks.*
+
+### Naming tests
+- Test title = behaviour + expected result: `saved login opens My account without logging in`
+- Step title = short action: `log in`, `search for "pliers"`
+- Files must end in `.spec.ts` (`account-spec.ts` is silently skipped)
+
 ## "I can now say…"
 - "I build page objects with locator fields and intent-level methods, keep assertions in tests, and enforce `await` with ESLint."
+- "Fixtures are Playwright's dependency injection: the test declares what it needs; the fixture builds it and cleans up."
+- "I log in once in a setup project and reuse `storageState`; tests stay isolated, and the login test opts out to test the real form."
+- "I prove a test can fail: my storageState check passed without a login until I asserted on real content."
 
 ## My notes
 -

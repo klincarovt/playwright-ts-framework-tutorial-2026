@@ -4,6 +4,16 @@ Every change to the framework: config, tests, structure, tooling. Newest first. 
 
 ---
 
+## 2026-11-18 · Auth path fix + .gitignore
+
+- `tests/setup/auth.setup.ts`: `path.join(__dirname, '../../playwright/.auth/user.json')`. After the move to `tests/setup/`, `../` wrote to `tests/playwright/.auth/` while the config read the root → stale login.
+- `.gitignore`: `playwright/.auth/` (no leading `/` → any folder) + `ci-report/` (downloaded CI report with traces).
+- Workflow: Environment renamed `.env` → `env` (`environment: env`).
+- CI still red: setup can't find the email field on GitHub runners → probably Cloudflare's bot check (to confirm in the trace).
+- Interview angle: "After a refactor, setup passed but tests weren't logged in: the setup wrote the auth file relative to `__dirname`, the config read from the root."
+
+---
+
 ## 2026-11-18 · Day 4: API, hybrid, mock, CI secrets
 
 - `tests/api/products.spec.ts`: GET product search (status + results) and POST login (token) with the `request` fixture.

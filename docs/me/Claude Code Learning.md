@@ -67,3 +67,9 @@ claude mcp add typescript npx ts-language-mcp /mnt/code/TypeScript/playwright-ts
 
 - I write the code and run the commands. Claude hints, reviews and keeps the docs.
 - Say **"wrap up"** at the end of a session, and Claude updates my notes in `docs/me/`.
+- I can ask Claude to do **chores** (rename titles, edit `.gitignore`). The learning code stays mine.
+- Claude has **memory** across sessions: when I say how I want to work ("explain why", "show a snippet for new APIs"), it remembers.
+- I can send a message **while Claude is working**; it reads it mid-task.
+- Rejecting a tool call (e.g. a file edit) stops Claude, so I can correct it right away.
+- Claude **checks files on disk**: if my run output doesn't match the code, I probably didn't save (Ctrl+S) or pasted old output.
+- Claude can be wrong: on Day 4 it guessed twice before finding the real bug (a path). Ask for **evidence**, not guesses.

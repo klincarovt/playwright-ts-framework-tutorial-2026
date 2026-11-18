@@ -34,12 +34,12 @@
 - [x] Project setup, codegen → clean spec with web-first assertions
 - [x] `baseURL` from env, role/label/test-id locators, trace viewer
 - [x] `.env` secrets, page objects, ESLint
-- [ ] Custom fixtures (`test.extend`) injecting page objects
-- [ ] Log in once with `storageState` (setup project)
-- [ ] API tests with the `request` fixture + API client layer
-- [ ] Hybrid test: API setup → UI check → API cleanup
-- [ ] Network mocking with `page.route`
-- [ ] CI with GitHub Secrets and report artifacts
+- [x] Custom fixtures (`test.extend`) injecting page objects
+- [x] Log in once with `storageState` (setup project)
+- [x] API tests with the `request` fixture (API client layer: todo)
+- [x] Hybrid test: API login → UI check
+- [x] Network mocking with `page.route`
+- [ ] CI with GitHub Secrets and report artifacts (runs; UI login blocked on GitHub runners, investigating)
 - [ ] Playwright MCP: AI-drafted tests, human-reviewed
 
 ## 📁 Project structure

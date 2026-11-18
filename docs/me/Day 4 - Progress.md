@@ -9,7 +9,7 @@
 - [ ] 3. API client layer (`ProductsApi` class + fixture): *skipped for now, optional*
 - [x] 4. Hybrid test: log in via the API → token into the browser → check `/account` in the UI
 - [x] 5. Mock the backend with `page.route`: fake an empty search result, check the UI shows no products
-- [ ] 6. GitHub Actions with secrets: *pushed, waiting for the green run*
+- [ ] 6. GitHub Actions with secrets: *runs, but red: setup can't see the login form on GitHub's servers (likely Cloudflare). Check the trace next.*
 
 ## Before you start
 - The practice site has a REST API at `api.practicesoftwaretesting.com`. You saw `/products/search` and the Bearer token in the Day 2 trace.
@@ -78,6 +78,28 @@ push → GitHub runner (fresh Linux) → npm ci → install browsers → npx pla
 | "Account locked, too many failed attempts" | Environment / test data | Switched demo user → real fix: dedicated test users |
 | Mock test timed out on `nav-home` | Test bug | The test started on a blank page → `page.goto('')` first |
 | Same output pasted again | Me 🙂 | Save (Ctrl+S) + check which terminal |
+| Mock: `Received: 9` products | Test bug (race) | Typed before the page was ready → wait for `search-term` first |
+| `account.spec` lands on Login, setup passes | Test bug (path) | Moved setup to `tests/setup/` → `../` wrote the file to the wrong folder → `../../` |
+| CI: `waiting for getByTestId('email')` ×3 retries | Environment | Same on every retry = not flaky. Probably Cloudflare bot check on GitHub's servers (check the trace) |
+
+### Paths: `__dirname` vs root
+```
+path.join(__dirname, '../../playwright/.auth/user.json')
+tests/setup/ → ../ → tests/ → ../ → <root>/playwright/.auth/user.json ✅
+```
+- `__dirname` = the folder of **this file** → moving the file changes the result
+- Config paths (`storageState: 'playwright/...'`) = from the **project root**
+
+### .gitignore: leading `/`
+| Line | Matches |
+| --- | --- |
+| `/playwright/.auth/` | Only at the root |
+| `playwright/.auth/` | In any folder ✅ |
+
+### Why `user.json` never goes to git
+- It holds a live **login token** = logged in as that user (site public ≠ account public)
+- CI doesn't need it: `setupUser` creates it fresh on every run
+- Deleting it locally is safe: the next test run regenerates it; `git pull` never touches ignored files
 
 ## "I can now say…"
 - "I test business logic through the API with Playwright's `request` fixture: fast, no browser."
@@ -89,6 +111,8 @@ push → GitHub runner (fresh Linux) → npm ci → install browsers → npx pla
 - Mocks felt like "asserting my own logic". The answer: the mock is the input, the UI's handling is what's tested.
 
 ## Open todos
+- CI: open the trace from the downloaded report (`ci-report/`) → what page does the runner get?
+- `mock.spec.ts`: add `await expect(searchPage.searchTerm).toHaveText('pliers');` before `toHaveCount(0)`
 - `hybrid.spec.ts`: add `test.use({ storageState: { cookies: [], origins: [] } })` so it really proves the API login
 - `playwright.yml`: delete the unused `BASE_URL` line · `.env`: `BaseURL` → `BASEURL`
 - Delete `example.spec.ts` and the old `login-search.spec.ts`; remove `console.log` in the API spec
