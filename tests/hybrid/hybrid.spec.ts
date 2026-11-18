@@ -2,7 +2,10 @@ import { test, expect } from '@playwright/test';
 
 const API = 'https://api.practicesoftwaretesting.com';
 
-test('Hybrid Test Case', async ({ request, page }) => {
+// Start logged out, so only the API login below can log the UI in
+test.use({ storageState: { cookies: [], origins: [] } });
+
+test('API login lets the UI open My account', async ({ request, page }) => {
 
     const response = await request.fetch(`${API}/users/login`, {
         method: 'POST',

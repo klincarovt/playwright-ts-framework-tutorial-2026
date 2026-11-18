@@ -1,7 +1,9 @@
 # Progress — Claude's mentor log
 
 > **↩ RESUME HERE**
-> - **Current:** Day 4/5 · Step 5 (GitHub Actions). Local suite fixed (auth path bug). **CI still red**: setup times out on `getByTestId('email')` on all retries → likely **Cloudflare bot check** for GitHub runners (`cf_clearance` cookie seen in user.json). Not yet confirmed: JoJo was downloading the CI report artifact (got `.zip.part`) to look at the trace. Next: confirm via trace → decide (accept + document, or skip UI in CI and run API tests only). Then Day 5.
+> - **Current:** Day 5/5 next (story, transfer map, cheat sheet out loud, Playwright MCP, short mock interview). Day 4 closed after JoJo added an `apiTest` project (his idea) + CI `--project=apiTest --no-deps`. First confirm the Actions run was green. Old notes below:
+> - **(old) Day 4/5 · Step 5 (GitHub Actions).** Local suite fixed (auth path bug). **CI still red**: setup times out on `getByTestId('email')` on all retries → likely **Cloudflare bot check** for GitHub runners (`cf_clearance` cookie seen in user.json). Not yet confirmed: JoJo was downloading the CI report artifact (got `.zip.part`) to look at the trace. Next: confirm via trace → decide (accept + document, or skip UI in CI and run API tests only). Then Day 5.
+> - **JoJo's decision (2026-11-18):** keeps `playwright/.auth/user.json` committed (removed the line from `.gitignore`; "will leave empty later and add to gitignore"). Warned once; don't re-argue, just remind at Day 5 cleanup. CI now runs `tests/api --project=chromium --no-deps`; API spec has `test.use` empty storageState. Local full suite: 15 passed.
 > - **Fixed 2026-11-18 afternoon:** moving `auth.setup.ts` to `tests/setup/` made `path.join(__dirname,'../…')` write to `tests/playwright/.auth/` → tests loaded a stale root user.json → `account.spec` landed on Login. Fix `../../`; `.gitignore` → `playwright/.auth/` (unanchored) + `ci-report/`. Claude chased 2 wrong hypotheses first (account clash, setup false positive) → check paths/files first next time. Mock spec race (typed before page ready → 9 home products) → suggested `searchTerm` toHaveText before count (not confirmed).
 > - **Open items (before/after the push):** `hybrid.spec.ts` has **no `test.use` empty storageState** (passes possibly via config login; told him 3×, dropped it); `playwright.yml` line `BASE_URL` = dead (config reads `BASEURL`); `.env` has `BaseURL` (mismatch, works via fallback); delete `example.spec.ts` + old `login-search.spec.ts`; remove `console.log(response)` in `tests/api/products.spec.ts`; firefox project commented out in config; `goToHomePage()` still clicks `nav-home` (mock spec works around it with `goto('')`). Unanswered check Qs: negative login API test; traces in a public CI artifact = secrets.
 > - **Repo:** `github.com/klincarovt/playwright-ts-framework-tutorial-2026` (remote `origin`, branch `main`). CI secrets live in a GitHub **Environment named `.env`** → workflow has `environment: .env`.
@@ -19,7 +21,7 @@ Plan: [Interview Plan](../Interview%20Plan.md) · Changelog: [framework-changelo
 | 1 | Setup, codegen login + search, run headed + UI mode | ✅ done (2026-11-12) |
 | 2 | Role locators, web-first assertions, `baseURL`, trace viewer | ✅ done (2026-11-15) |
 | 3 | 2 page objects + 1 custom fixture, `storageState` | ✅ done (2026-11-18) |
-| 4 | 2 API tests, 1 hybrid, 1 `page.route` mock, GitHub Actions | 🟡 waiting for CI result (2026-11-18) |
+| 4 | 2 API tests, 1 hybrid, 1 `page.route` mock, GitHub Actions | ✅ done (2026-11-18), pending green Actions run of the `apiTest` push |
 | 5 | Story, transfer map, cheat sheet out loud; Playwright MCP | ⬜ |
 
 ## Weak spots (all days)

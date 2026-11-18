@@ -9,7 +9,7 @@
 - [ ] 3. API client layer (`ProductsApi` class + fixture): *skipped for now, optional*
 - [x] 4. Hybrid test: log in via the API → token into the browser → check `/account` in the UI
 - [x] 5. Mock the backend with `page.route`: fake an empty search result, check the UI shows no products
-- [ ] 6. GitHub Actions with secrets: *runs, but red: setup can't see the login form on GitHub's servers (likely Cloudflare). Check the trace next.*
+- [x] 6. GitHub Actions with secrets: CI runs the **API tests** (`apiTest` project). The UI suite runs locally: the demo site blocks GitHub's servers (likely Cloudflare)
 
 ## Before you start
 - The practice site has a REST API at `api.practicesoftwaretesting.com`. You saw `/products/search` and the Bearer token in the Day 2 trace.

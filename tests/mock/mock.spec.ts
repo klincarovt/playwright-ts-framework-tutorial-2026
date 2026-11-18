@@ -11,5 +11,7 @@ test('search shows no results when the API returns an empty list', async ({ page
    await searchPage.goToHomePage();
    await searchPage.searchProductByName('pliers');
 
+  // Wait until the search really ran, then check the UI shows nothing
+  await expect(searchPage.searchTerm).toHaveText('pliers');
   await expect(searchPage.productNames).toHaveCount(0);
 });

@@ -39,7 +39,7 @@
 - [x] API tests with the `request` fixture (API client layer: todo)
 - [x] Hybrid test: API login → UI check
 - [x] Network mocking with `page.route`
-- [ ] CI with GitHub Secrets and report artifacts (runs; UI login blocked on GitHub runners, investigating)
+- [x] CI with GitHub Secrets and report artifacts (API suite; the demo site blocks UI runs on GitHub runners)
 - [ ] Playwright MCP: AI-drafted tests, human-reviewed
 
 ## 📁 Project structure

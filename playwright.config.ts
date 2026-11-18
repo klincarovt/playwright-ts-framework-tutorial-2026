@@ -26,7 +26,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
-    baseURL: process.env.BASEURL ||'https://practicesoftwaretesting.com',
+    baseURL: process.env.BASEURL || 'https://practicesoftwaretesting.com',
     testIdAttribute: 'data-test',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
@@ -40,7 +40,12 @@ export default defineConfig({
       testMatch: /.*\.setup\.ts/
     },
     {
+      name: 'apiTest',
+      testMatch: /api\/.*\.spec\.ts/,
+    },
+    {
       name: 'chromium',
+      testIgnore: /api\//,
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.auth/user.json'
@@ -59,6 +64,7 @@ export default defineConfig({
 
     {
       name: 'webkit',
+      testIgnore: /api\//,
       use: {
         ...devices['Desktop Safari'],
         storageState: 'playwright/.auth/user.json'

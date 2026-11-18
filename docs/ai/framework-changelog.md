@@ -4,6 +4,16 @@ Every change to the framework: config, tests, structure, tooling. Newest first. 
 
 ---
 
+## 2026-11-18 · apiTest project, CI runs API tests
+
+- `playwright.config.ts`: new project `apiTest` (no `storageState`, no `dependencies`). Todo: `testMatch: /api\/.*\.spec\.ts/` on it, `testIgnore: /api\//` on chromium/webkit (local full runs).
+- `tests/api/products.spec.ts`: `test.use` empty storageState; `console.log` removed.
+- Workflow: `npx playwright test tests/api --project=apiTest --no-deps`. UI suite runs locally only: the public site blocks GitHub runners (likely Cloudflare, not confirmed).
+- `.gitignore`: `playwright/.auth/` line removed by JoJo's choice (user.json committed for now; plan: empty it + re-ignore).
+- Interview angle: "Separate API project without browser state; CI runs it because the demo site blocks cloud runners. Real project: bot-free test env or a self-hosted runner."
+
+---
+
 ## 2026-11-18 · Auth path fix + .gitignore
 
 - `tests/setup/auth.setup.ts`: `path.join(__dirname, '../../playwright/.auth/user.json')`. After the move to `tests/setup/`, `../` wrote to `tests/playwright/.auth/` while the config read the root → stale login.

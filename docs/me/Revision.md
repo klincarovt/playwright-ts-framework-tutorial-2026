@@ -503,3 +503,17 @@ Short-term: switch demo user. Long-term: **dedicated test users** (per pipeline/
 **Paths before theories.** Setup writes the file with `path.join(__dirname, ...)` = relative to the **setup file's folder**; the config reads relative to the **project root**. Moving `auth.setup.ts` into `tests/setup/` made it write to `tests/playwright/.auth/` → the tests loaded an **old** file.
 Also: `.gitignore` `/playwright/.auth/` (leading `/`) = root only → the new location was **not ignored**. Use `playwright/.auth/`.
 </details>
+
+### 4.4 Name a negative login API test. 🟡
+<details><summary>Answer</summary>
+
+Wrong credentials → expect **401** and **no `access_token`**.
+Catch: use a **non-existent email**, not the real user with a wrong password → failed attempts **lock** the shared account your other tests need.
+</details>
+
+### 4.5 Why is a CI report with traces risky on a public repo? ✅
+<details><summary>Answer</summary>
+
+Traces store request headers (Bearer token), cookies, localStorage and typed values (passwords from `fill()`); public-repo artifacts can be downloaded.
+GitHub masks secrets as `***` **only in log text**, not inside `trace.zip`. Fixes: private repo, short `retention-days`, no trace on the login step.
+</details>
