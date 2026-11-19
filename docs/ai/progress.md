@@ -1,7 +1,14 @@
 # Progress — Claude's mentor log
 
 > **↩ RESUME HERE**
-> - **Current:** Day 5/5 next (story, transfer map, cheat sheet out loud, Playwright MCP, short mock interview). Day 4 closed after JoJo added an `apiTest` project (his idea) + CI `--project=apiTest --no-deps`. First confirm the Actions run was green. Old notes below:
+> - **All 5 days done (2026-11-19).** JoJo comes back for discussions + improvement. Start from `docs/me/Day 5 - Progress.md` → "Where to improve" (priority: 3 stories out loud, keywords, ❌ fundamentals, answer shape, hands-on tasks). Optional: repo walkthrough, Playwright MCP hands-on.
+> - **NEXT SESSION FIRST (JoJo, 2026-11-19): Playwright MCP hands-on** (the only unticked README roadmap item). Claude explores the Toolshop site via the MCP browser and drafts a test → JoJo reviews it like a PR (reasoning first, keywords flagged), makes it fail once on purpose, then ticks the roadmap. Blocker from before: MCP's Chrome isn't installed → JoJo runs `npx playwright install chrome` first.
+> - **JoJo's next plan (2026-11-19):** watch the 6h "Playwright Automation Testing With TypeScript" full course (1.5×, skim what we built, slow down on gaps: describe/hooks, tags/`--grep`, frames, tabs, dialogs, upload, `waitForResponse`, `toHaveScreenshot`, reporters, per-env config), then a **solo project on a different site** (saucedemo / automationexercise) rebuilt from memory + 2–3 course topics. He brings it back for a PR-style review → it becomes his 2nd interview story.
+> - **Grading rule (JoJo, Day 5):** mark the **reasoning**; flag wrong keywords first (still wanted); missed specifics = notes, not the mark. Ask before changing Revision.md marks after a dispute.
+> - **Revision.md marks pending:** recall Qs re-graded on reasoning in chat (3W.3 ✅, 3W.4 ✅, 3.14 ✅, 4.3 🟡) but the file still shows the earlier marks; JoJo didn't confirm the change.
+> - **PDF:** `docs/revision-pdf.js` (Claude wrote it on request) → JoJo runs `node docs/revision-pdf.js` → `docs/me/Revision.pdf`. ✅ Works (2026-11-19), lint clean. Open: commit vs gitignore the PDF (JoJo decides); emoji rendering unchecked.
+> - **(old) Next session plan (2026-11-18):** start with recall of the ❌ questions, then Day 5. Done.
+> - **(old) Current:** Day 5/5 next (story, transfer map, cheat sheet out loud, Playwright MCP, short mock interview). Day 4 closed after JoJo added an `apiTest` project (his idea) + CI `--project=apiTest --no-deps`. CI green ✅ (2 passed). Claude applied (on request) gitignore `playwright/.auth/`, hybrid `test.use`, mock `searchTerm` wait, `testIgnore: /api\//` on chromium/webkit; JoJo to run `git rm --cached playwright/.auth/user.json` + full local run. Old notes below:
 > - **(old) Day 4/5 · Step 5 (GitHub Actions).** Local suite fixed (auth path bug). **CI still red**: setup times out on `getByTestId('email')` on all retries → likely **Cloudflare bot check** for GitHub runners (`cf_clearance` cookie seen in user.json). Not yet confirmed: JoJo was downloading the CI report artifact (got `.zip.part`) to look at the trace. Next: confirm via trace → decide (accept + document, or skip UI in CI and run API tests only). Then Day 5.
 > - **JoJo's decision (2026-11-18):** keeps `playwright/.auth/user.json` committed (removed the line from `.gitignore`; "will leave empty later and add to gitignore"). Warned once; don't re-argue, just remind at Day 5 cleanup. CI now runs `tests/api --project=chromium --no-deps`; API spec has `test.use` empty storageState. Local full suite: 15 passed.
 > - **Fixed 2026-11-18 afternoon:** moving `auth.setup.ts` to `tests/setup/` made `path.join(__dirname,'../…')` write to `tests/playwright/.auth/` → tests loaded a stale root user.json → `account.spec` landed on Login. Fix `../../`; `.gitignore` → `playwright/.auth/` (unanchored) + `ci-report/`. Claude chased 2 wrong hypotheses first (account clash, setup false positive) → check paths/files first next time. Mock spec race (typed before page ready → 9 home products) → suggested `searchTerm` toHaveText before count (not confirmed).
@@ -21,8 +28,8 @@ Plan: [Interview Plan](../Interview%20Plan.md) · Changelog: [framework-changelo
 | 1 | Setup, codegen login + search, run headed + UI mode | ✅ done (2026-11-12) |
 | 2 | Role locators, web-first assertions, `baseURL`, trace viewer | ✅ done (2026-11-15) |
 | 3 | 2 page objects + 1 custom fixture, `storageState` | ✅ done (2026-11-18) |
-| 4 | 2 API tests, 1 hybrid, 1 `page.route` mock, GitHub Actions | ✅ done (2026-11-18), pending green Actions run of the `apiTest` push |
-| 5 | Story, transfer map, cheat sheet out loud; Playwright MCP | ⬜ |
+| 4 | 2 API tests, 1 hybrid, 1 `page.route` mock, GitHub Actions | ✅ done (2026-11-18), CI green (`apiTest`, 2 passed) |
+| 5 | Story, transfer map, cheat sheet out loud; Playwright MCP | ✅ done (2026-11-19), MCP concept only |
 
 ## Weak spots (all days)
 - Tool vs protocol terminology (Playwright vs WebSocket)
@@ -135,3 +142,24 @@ Plan: [Interview Plan](../Interview%20Plan.md) · Changelog: [framework-changelo
 - `page.route` + `route.fulfill`; when mocks are useful vs tautologies; contract drift
 - Shared demo accounts lock → dedicated test users
 - GitHub Actions workflow, runner, repository secrets vs environment secrets, `env:` per step, `??` doesn't catch `''`
+
+---
+
+## Day 5
+
+### Step log
+| Step | Result | Notes |
+| --- | --- | --- |
+| Recall | 🟡 | Disputed Q1 marks ("steps share, tests don't" was right) → new rule: grade reasoning, flag keywords, specifics as notes. Forgot the auth path bug details. |
+| Story | 🟡 | Timeline-style intro; mock described as "server down" (it's empty results); picked hybrid as the "problem" (it's a design decision). No CI mention. Strong: POM/fixture reasoning, "next" ideas (auth fixture, per-env config, projects by test type). |
+| Transfer map | 🟡 | Rusty on Selenium (API background). DataProvider → said storageState (❌); Grid unknown. Map + RestAssured rows in Revision Part 4. |
+| Cheat sheet | 🟡 | "Modern/market" as the Playwright reason; CI-only: skipped "get the trace first", then agreed. Said "browsers are the issue" for CI (not proven). |
+| MCP | 🟡 | Concept only. Called MCP "an API call"; accepted protocol / tool-call wording. Skipped the accessibility-tree question. |
+| Mock interview | 🟡 | Auth ✅, UI vs API ✅ (test pyramid), hardest bug vague, logged-out fix = "assert the token" (wrong layer), flaky = "retries usually work" (trap). |
+
+### Concepts covered
+- Test pyramid; hybrid as the senior answer to UI vs API
+- Flaky process: `--repeat-each`, trace, root cause, `test.fixme`
+- Workers + sharding replace Grid; a data-driven loop replaces DataProvider
+- MCP: protocol, server, tools, accessibility tree, review AI output
+- `page.pdf()` / `setContent` / `addScriptTag` (PDF export script)

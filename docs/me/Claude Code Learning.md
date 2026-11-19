@@ -73,3 +73,6 @@ claude mcp add typescript npx ts-language-mcp /mnt/code/TypeScript/playwright-ts
 - Rejecting a tool call (e.g. a file edit) stops Claude, so I can correct it right away.
 - Claude **checks files on disk**: if my run output doesn't match the code, I probably didn't save (Ctrl+S) or pasted old output.
 - Claude can be wrong: on Day 4 it guessed twice before finding the real bug (a path). Ask for **evidence**, not guesses.
+- I can **push back on grading**: on Day 5 I asked Claude to mark my **reasoning** and only flag keywords and details separately. It saved that as a rule.
+- Claude can write **helper scripts** on request (e.g. `docs/revision-pdf.js` → PDF of my revision notes). I run them.
+- A **long session gets summarized** automatically (context limit); the docs and memory carry everything over.

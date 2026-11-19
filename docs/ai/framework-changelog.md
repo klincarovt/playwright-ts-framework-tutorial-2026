@@ -4,6 +4,13 @@ Every change to the framework: config, tests, structure, tooling. Newest first. 
 
 ---
 
+## 2026-11-19 · Revision PDF export script
+
+- `docs/revision-pdf.js` (Claude wrote it on request): renders `docs/me/Revision.md` with `marked` (CDN) in Playwright's Chromium, opens every `<details>`, and saves `docs/me/Revision.pdf` via `page.pdf()`. Run: `node docs/revision-pdf.js` (moved from `scripts/` on request; verified working, lint clean).
+- Interview angle: "Playwright isn't only a test runner. I used it as a browser-automation tool to generate a PDF."
+
+---
+
 ## 2026-11-18 · apiTest project, CI runs API tests
 
 - `playwright.config.ts`: new project `apiTest` (no `storageState`, no `dependencies`). Todo: `testMatch: /api\/.*\.spec\.ts/` on it, `testIgnore: /api\//` on chromium/webkit (local full runs).

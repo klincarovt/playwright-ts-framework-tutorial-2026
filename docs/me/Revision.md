@@ -310,7 +310,7 @@ One-liner: *locators describe, actions do. Only the doing is awaited.*
 Why: SRP. A POM that asserts mixes "how to use the page" with "what is correct", so it can't be reused for negative tests.
 </details>
 
-### 3W.3 Test A logs in, test B runs after it in the same file. Is B logged in? ❌
+### 3W.3 Test A logs in, test B runs after it in the same file. Is B logged in? ❌ (Day 5: ❌ again, said "context is usually shared")
 <details><summary>Answer</summary>
 
 **No.** Every `test()` gets its **own fresh browser context** (no cookies, no storage), even in the same file.
@@ -324,7 +324,7 @@ Why: SRP. A POM that asserts mixes "how to use the page" with "what is correct",
 Rule: **context per test.** Fix for "log in once": `storageState`.
 </details>
 
-### 3W.4 Failure triage: the 3 categories + evidence? ❌
+### 3W.4 Failure triage: the 3 categories + evidence? 🟡 (Day 5: categories OK, no own examples)
 <details><summary>Answer</summary>
 
 Triage = sort a red test into a cause **before** fixing it.
@@ -433,7 +433,7 @@ Within one test, `page` is created **once** and shared: my fixtures and the test
 I import **`test`** (not `searchPage`) from my fixtures file. When the test asks for `{ searchPage }` **by name**, Playwright runs my fixture and **injects** the object = dependency injection.
 </details>
 
-### 3.14 What happens if a fixture never calls `use()`? ❌
+### 3.14 What happens if a fixture never calls `use()`? 🟡 (Day 5: "value isn't passed", missed "test never starts")
 <details><summary>Answer</summary>
 
 `extend` **creates** the fixture; `use()` **hands the value to the test**. Without `use()` the test never receives it → it can't start → Playwright fails it with an error (or a timeout if the fixture hangs).
@@ -497,7 +497,7 @@ Interview line: *"Mocks test how the UI handles responses I can't produce on dem
 Short-term: switch demo user. Long-term: **dedicated test users** (per pipeline/worker, created via API), never shared accounts; avoid repeated failed logins in tests.
 </details>
 
-### 4.3 Setup passes, but tests start logged out. What do you check first? ❌ (spent a while on wrong guesses)
+### 4.3 Setup passes, but tests start logged out. What do you check first? ❌ (spent a while on wrong guesses) (Day 5: ❌ again, forgot the moved setup file)
 <details><summary>Answer</summary>
 
 **Paths before theories.** Setup writes the file with `path.join(__dirname, ...)` = relative to the **setup file's folder**; the config reads relative to the **project root**. Moving `auth.setup.ts` into `tests/setup/` made it write to `tests/playwright/.auth/` → the tests loaded an **old** file.
@@ -517,3 +517,93 @@ Catch: use a **non-existent email**, not the real user with a wrong password →
 Traces store request headers (Bearer token), cookies, localStorage and typed values (passwords from `fill()`); public-repo artifacts can be downloaded.
 GitHub masks secrets as `***` **only in log text**, not inside `trace.zip`. Fixes: private repo, short `retention-days`, no trace on the login step.
 </details>
+
+## Day 5: mock interview
+
+### 5.1 Walk me through how your framework handles authentication. ✅
+<details><summary>Answer</summary>
+
+*"A setup project runs `auth.setup.ts` once: it logs in through the UI and saves cookies and localStorage to a JSON file. The browser projects depend on it and load that file, so every test starts logged in, with its own fresh context. Login tests opt out, and the file is gitignored."*
+Say it as two parts: the **setup file** logs in, the **specs** only load the state.
+</details>
+
+### 5.2 Tell me about the hardest bug you hit. 🟡 (too vague; said "browsers" = not proven)
+<details><summary>Answer</summary>
+
+*"The hardest part was CI. Tests passed locally but failed on GitHub Actions. First, a secret was named `BASE_URL` while the config read `BASEURL`. Env var names are case-sensitive, so I renamed it. Then the UI login timed out only on the runner. API tests passed, so it wasn't the code. Most likely the site's bot protection blocks runner IPs. I split the projects so CI runs the API suite, and the UI suite runs locally until I can confirm it via the trace. Lesson: CI-only failures are usually environment, so check config and evidence before changing tests."*
+</details>
+
+### 5.3 What do you automate at UI level vs API level? ✅
+<details><summary>Answer</summary>
+
+*"I follow the **test pyramid**. Most checks go at API level: data, business rules, error codes, persistence. They're fast and stable. UI tests cover the critical user flows end to end and what's displayed. Where a UI test needs setup, like login or test data, I do that via API."*
+</details>
+
+### 5.4 Setup passes, but tests run logged out. How do you debug it? 🟡 (evidence first ✅; "assert the token" doesn't catch it)
+<details><summary>Answer</summary>
+
+*"Setup passing means login works, so the issue is between saving and loading the state. I compare the path setup writes to with the path the config reads, and check that the file is fresh. In my case I'd moved the setup file and `__dirname` sent it to the wrong folder. To catch it next time, tests assert logged-in-only content, so they fail instead of passing silently."*
+Command: `npx playwright show-report` (not `show-result`).
+</details>
+
+### 5.5 A test is flaky. What do you do? 🟡 ("retries usually work" = trap)
+<details><summary>Answer</summary>
+
+*"I reproduce it with `--repeat-each`, then read the trace. Usually it's timing, so I replace fixed waits with web-first assertions on real content, or it's shared test data between parallel tests. Retries are a safety net that flags flaky tests; they're not the fix."*
+Can't fix it yet → `test.fixme` + ticket.
+</details>
+
+### 5.6 Why Playwright over Selenium? 🟡
+<details><summary>Answer</summary>
+
+*"Selenium can do most of it, but Playwright has it built in: auto-waiting, web-first assertions, its own runner, traces, parallel workers and API testing. So I write less plumbing and fewer manual waits, and one API covers Chromium, Firefox and WebKit."*
+"Modern, the market wants it" is not a technical reason.
+</details>
+
+### 5.7 What is Playwright MCP? 🟡 (wording)
+<details><summary>Answer</summary>
+
+MCP = **Model Context Protocol**, an open protocol (by Anthropic) for connecting AI to tools. An **MCP server** exposes tools; the AI makes **tool calls**. The Playwright MCP gives the AI a real browser and reads the **accessibility tree** (small, meaningful, matches `getByRole`).
+*"I'd use it to explore and draft tests faster, but I review the output like any PR, and make it fail once on purpose."*
+</details>
+
+## Keywords to fix (Day 5)
+
+| I said | Say |
+| --- | --- |
+| feature (for functionality) | functionality / page |
+| perProject, "spec that logs in" | setup project + `dependencies`, setup file |
+| performance (for test speed) | test speed / run time |
+| await (as the wait) | auto-waiting, web-first assertions |
+| locatorStrategy, storageContext | `page.locator()` / `getByRole()`, `storageState` |
+| data-set | `data-test` attribute + `getByTestId()` |
+| show-result | `show-report` / `show-trace` |
+| MCP = API call | protocol; the server exposes tools; the AI makes tool calls |
+
+# Part 4: My project examples (interview stories)
+
+Learn only these 3. Each one: **what happened → how I found it → fix → lesson**.
+
+| # | Story | Category | Use it for |
+| --- | --- | --- | --- |
+| 1 | **Auth path bug.** I moved `auth.setup.ts` into `tests/setup/`. Setup passed, but tests ran logged out. `__dirname` made it write to `tests/playwright/.auth/`, while the config read `playwright/.auth/` → stale file. Fixed to `../../`. **Lesson:** check paths before theories. | Test bug | debugging, storageState, "hardest bug" |
+| 2 | **False positive.** `goto('/account')` + `toHaveURL('/account')` passed even logged out (SPA redirects later). Asserted page content (`page-title` = "My account") and proved it fails without login. **Lesson:** a green test must be able to go red. | Test bug | assertions, flaky/false-positive tests |
+| 3 | **CI blocked.** UI login timed out on GitHub runners (likely Cloudflare bot protection); the demo account also got locked from failed logins. Ran the API suite in CI as its own project, UI stays local. **Lesson:** dedicated test users, environment ≠ code bug. | Environment | CI/CD, triage, test data |
+
+## Java / API → Playwright map
+
+| Java / Selenium / RestAssured | Playwright + TS |
+| --- | --- |
+| `@BeforeEach` / `@AfterEach` | `test.beforeEach` / `test.afterEach`, or a **fixture** (code before/after `use()`) |
+| `@BeforeAll` / `@BeforeSuite` | `test.beforeAll`, or a **setup project** (`dependencies`) |
+| `WebDriverWait` + `ExpectedConditions` | **Auto-waiting** + web-first assertions (`await expect(loc).toBeVisible()`) |
+| `driver.findElement(By.id(...))` | `page.getByRole/getByTestId(...)`: a **lazy locator**, found when used |
+| Page Factory `@FindBy` | Locator fields in the POM constructor |
+| TestNG `@DataProvider` | A `for` loop over an array that creates `test()`s |
+| `pom.xml` | `package.json` (+ lock file) |
+| `.properties` file | `.env` + `process.env` (dotenv) |
+| Selenium Grid | Built-in **workers** (parallel), sharding in CI |
+| RestAssured `given().when().then()` | `request.get/post(...)` + `expect(response.status())` |
+| `response.jsonPath().get("x")` | `const { x } = await response.json()` |
+
+Spare one-liners: secret named `BASE_URL` vs `BASEURL` (env var names are case-sensitive); `account-spec.ts` silently skipped (wrong file name pattern).
