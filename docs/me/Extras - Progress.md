@@ -140,7 +140,7 @@ Order follows dependencies: each item uses the one before it.
 ## Status
 
 - Sprint S1–S9 ✅, committed, CI green (2026-11-21).
-- Next: my solo project from `Solo Project - Senior Framework.md` (Tier 1 first), each step reviewed.
+- Next: my solo project from `Solo Project - Senior Framework.md` (interview-first edition): **starter kit S1–S8 → 3-hour mock test task on saucedemo → review**, then the full framework. Stuck? → `Solo Project - Deep Dive.md` (same section numbers, patterns + model answers).
 
 ## Questions
 -

@@ -80,3 +80,6 @@ claude mcp add typescript npx ts-language-mcp /mnt/code/TypeScript/playwright-ts
 - When I **ask a question**, I want an answer, not a file edit. I can reject the edit and say so; Claude saves that as a rule.
 - Claude can't open some web pages or GitHub repos in this sandbox. **Downloading them into a folder** (here `oldProjects/`, gitignored) lets it read them.
 - I can paste a spec from another chat (e.g. "what a senior project contains") and Claude maps it onto my plan.
+- **`/effort max`** makes Claude reason as deeply as it can (slower, more tokens). Worth it for a careful review, not for small steps.
+- **Memory and `CLAUDE.md` belong to the project folder.** A new repo starts **without** my learning-mode rules and saved preferences. Fix: put the rules in the new repo's `CLAUDE.md`, or personal ones in `~/.claude/CLAUDE.md` (applies to every project).
+- Using **two AIs** works well: one drafts or revises, Claude reviews it like a PR. The review caught real bugs in the AI's draft (a test that could never fail, CI that would never run).
