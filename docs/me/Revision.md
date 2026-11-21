@@ -708,6 +708,40 @@ A `for...of` loop over the data that creates one `test()` per item; the title in
 | show-result | `show-report` / `show-trace` |
 | MCP = API call | protocol; the server exposes tools; the AI makes tool calls |
 
+## Selenium classics → Playwright (talk level, not built)
+
+Likely interview question for a Java/Selenium background. Not in my repo (Toolshop has no iframe); practice site if needed: https://the-internet.herokuapp.com (iframe, windows, javascript_alerts, upload).
+
+| Topic | Selenium | Playwright |
+| --- | --- | --- |
+| **iframe** | `driver.switchTo().frame("id")` → mode switch for the whole driver; leave with `switchTo().defaultContent()` | `page.frameLocator('#id').getByRole('button')`: just part of the locator chain, no switching, auto-waits |
+| **New tab / popup** | `driver.getWindowHandles()` + `switchTo().window(handle)` | `const [newPage] = await Promise.all([context.waitForEvent('page'), link.click()])` → a normal `Page` |
+| **Alert / dialog** | `driver.switchTo().alert().accept()` | `page.on('dialog', d => d.accept())`, registered **before** the action (Playwright auto-dismisses otherwise) |
+| **File upload** | `element.sendKeys("/path/file")` | `await page.getByLabel('Upload').setInputFiles('path/file')` |
+
+**Interview line:** *"In Playwright an iframe is just part of the locator chain (`frameLocator`), with no switching state to forget. Tabs are events (`waitForEvent('page')`), dialogs are handlers set before the action."*
+
+**When it matters on the job:** payment widgets (Stripe), embedded editors, chat widgets, maps, older enterprise apps.
+Docs: https://playwright.dev/docs/frames · https://playwright.dev/docs/pages#handling-new-pages · https://playwright.dev/docs/dialogs · https://playwright.dev/docs/input#upload-files
+
+## JS/TS gotchas (my own slips, sprint 2026-11-21)
+
+My Playwright concepts are solid; these small JS/TS details cost the most time. Check them first when something breaks.
+
+| Slip | Rule | 📍 Where it happened |
+| --- | --- | --- |
+| Missing `return` in a client method | A method that should give something back needs `return` (otherwise `undefined` + a floating promise) | `api/ProductsClient.ts:9` |
+| `await` without `async` | `await` only works inside an `async` function | `fixtures/fixtures.ts:22, 25` |
+| `for...in` over an array | `for...in` = keys/indexes; arrays → **`for...of`** = values | `tests/ui/search.spec.ts:10` |
+| `import { Products } from '…json'` | JSON/default imports: **no braces**; braces = a named export, name must match | `tests/ui/search.spec.ts:2` |
+| `'../api/…'` from `tests/api/` | Count the folders up from the **current file** (`../../api`) | `tests/api/products.spec.ts:2` |
+| `'/test-results/junit.xml'` | No leading `/` in paths: it means the disk root (`.gitignore` is the exception: repo root) | `playwright.config.ts:27` |
+| `login()` read `process.env` instead of its parameters | The **test** decides the input; methods use their parameters | `api/AuthClient.ts:12-13` |
+| `` `${}` `` left empty, stray auto-imports (`fail`, `log`) | Check the top of the file after the editor auto-imports | `playwright.config.ts:2, 11` |
+| Listener added after the action (`page.on` / `waitForResponse`) | Start listening **before** the action | `tests/mock/mock.spec.ts` |
+
+**Habit for the solo project:** keep a short **stuck log** (what blocked me → how I fixed it). It's interview material and shows what to review.
+
 # Part 4: My project examples (interview stories)
 
 Learn only these 3. Each one: **what happened → how I found it → fix → lesson**.

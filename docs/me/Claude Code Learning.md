@@ -76,3 +76,7 @@ claude mcp add typescript npx ts-language-mcp /mnt/code/TypeScript/playwright-ts
 - I can **push back on grading**: on Day 5 I asked Claude to mark my **reasoning** and only flag keywords and details separately. It saved that as a rule.
 - Claude can write **helper scripts** on request (e.g. `docs/revision-pdf.js` → PDF of my revision notes). I run them.
 - A **long session gets summarized** automatically (context limit); the docs and memory carry everything over.
+- **`/plan`** turns on plan mode: Claude only reads and writes a plan file, then asks me to approve before changing anything.
+- When I **ask a question**, I want an answer, not a file edit. I can reject the edit and say so; Claude saves that as a rule.
+- Claude can't open some web pages or GitHub repos in this sandbox. **Downloading them into a folder** (here `oldProjects/`, gitignored) lets it read them.
+- I can paste a spec from another chat (e.g. "what a senior project contains") and Claude maps it onto my plan.

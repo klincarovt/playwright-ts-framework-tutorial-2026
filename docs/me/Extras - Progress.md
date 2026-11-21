@@ -122,7 +122,25 @@ Order follows dependencies: each item uses the one before it.
 ---
 
 ## 📘 Learn notes
-*(filled in as topics are done)*
+
+| Topic | One-liner | 📍 |
+| --- | --- | --- |
+| Reporters | 3 readers: `list` = person live, `html` = person debugging, `junit` XML = the CI tool | `playwright.config.ts:30-32` |
+| Paths | No leading `/` in a path: it's the disk root (`EACCES mkdir '/test-results'`) | `playwright.config.ts:31` |
+| Old test | `test.skip` + reason, not commented out: stays type-checked, shows as skipped | `tests/ui/login-search.spec.ts:5-6` |
+| Environments | `ENV=staging` → `.env.staging`; `.gitignore` `.env*`. Senior: typed config + fail-fast | `playwright.config.ts:10-14` |
+| Silent fallback | `process.env.X \|\| 'default'` hides typos → senior frameworks fail fast | `playwright.config.ts` baseURL |
+| API clients | "POM for the API": endpoints in one place, return the response, no assertions → negative tests possible | `api/*.ts` |
+| Client fixtures | Built from `request`, not `page` → API tests launch no browser | `fixtures/fixtures.ts` |
+| `waitForResponse` | Start waiting **before** the action; sync on fresh data, clear 500 errors | `tests/ui/search.spec.ts:12-14` |
+| Data-driven | `for...of` over JSON → one uniquely named `test()` per row (≈ DataProvider) | `tests/ui/search.spec.ts:10-11` |
+| Tags + scripts | `@smoke` + `npm run test:smoke`; dependencies (setup) run automatically | `package.json` |
+| Flaky mock | Evidence → rule out (URL, service worker) → time-box → `fixme`, never delete the assertion | `tests/mock/mock.spec.ts` |
+
+## Status
+
+- Sprint S1–S9 ✅, committed, CI green (2026-11-21).
+- Next: my solo project from `Solo Project - Senior Framework.md` (Tier 1 first), each step reviewed.
 
 ## Questions
 -
