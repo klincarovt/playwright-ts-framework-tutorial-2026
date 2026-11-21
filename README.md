@@ -20,16 +20,19 @@
 | | Feature | Why it matters |
 | --- | --- | --- |
 | 🧱 | **Page Object Model**: `LoginPage`, `SearchPage` | Locators live in one place; tests read like user steps |
-| 💉 | **Custom fixtures** (`test.extend`) | Page objects are injected into tests; no `new LoginPage(page)` everywhere |
+| 💉 | **Custom fixtures** (`test.extend`) | Page objects **and API clients** are injected by name; no `new LoginPage(page)` everywhere |
 | 🔑 | **Log in once** with `storageState` (setup project) | Every test starts logged in, still in its own fresh context |
-| 🌐 | **API tests** with the `request` fixture | Fast checks of search and login endpoints |
+| 🌐 | **API client layer**: `ProductsClient`, `AuthClient` | The API's page objects: endpoints in one place, no assertions inside, reused by API and hybrid tests |
+| 🧪 | **Data-driven + tagged tests** | One test per row of `data/products.json`, tagged `@smoke`, run with `npm run test:smoke` |
+| 📡 | **Network sync** with `waitForResponse` | Assertions run on fresh search results, and a backend error fails with a clear status |
 | 🔀 | **Hybrid test**: API login → UI check | Skips slow UI login steps; faster and more stable |
 | 🎭 | **Network mocking** with `page.route` | Tests the UI's reaction to an empty result list |
-| 🗂️ | **Projects** by purpose: `setupUser`, `apiTest`, `chromium`, `webkit` | API tests run without a browser login; UI tests depend on setup |
+| 🗂️ | **Projects** by purpose: `setupUser`, `apiTest`, `chromium` (WebKit/Firefox ready, commented out) | API tests run without a browser login; UI tests depend on setup |
 | 🎯 | **Resilient locators**: `getByRole`, `getByLabel`, `getByTestId` | Tests follow what the user sees, not fragile CSS |
 | ⏳ | **Web-first assertions** + auto-waiting | No sleeps; assertions retry until the page is ready |
 | 🪜 | **`test.step`** blocks | Readable reports and traces: you see *which step* failed |
-| 🌍 | **Environment config** via `.env` + `BASEURL` | Same suite on any environment, no code changes |
+| 🌍 | **Environment switch**: `ENV=staging` loads `.env.staging` | Same suite on any environment, no code changes |
+| 📊 | **Reporters**: `list` + `html`, plus JUnit XML on CI; screenshot on failure | Live log, debuggable report, and results the CI tool can read |
 | 🔐 | **No secrets in code** | Credentials come from `.env` locally and GitHub Secrets in CI |
 | 🧹 | **ESLint `no-floating-promises`** | A missing `await` can't slip through |
 | 🔍 | **Trace viewer** debugging | DOM snapshots, network and console for every step |
@@ -42,7 +45,11 @@
 - [x] `.env` secrets, page objects, ESLint
 - [x] Custom fixtures (`test.extend`) injecting page objects
 - [x] Log in once with `storageState` (setup project)
-- [x] API tests with the `request` fixture (API client layer: todo)
+- [x] API tests with the `request` fixture
+- [x] API client layer injected via fixtures
+- [x] Reporters (list/html/JUnit), screenshots on failure, env switch (`ENV`)
+- [x] Showcase spec: `describe` + hooks, `@smoke` tag, data-driven loop, `waitForResponse`
+- [x] npm scripts; CI calls `npm run test:api`
 - [x] Hybrid test: API login → UI check
 - [x] Network mocking with `page.route`
 - [x] CI with GitHub Secrets and report artifacts (API suite; the demo site blocks UI runs on GitHub runners)
@@ -54,11 +61,15 @@
 ├── pages/                    # Page objects: locators + actions
 │   ├── LoginPage.ts
 │   └── SearchPage.ts
-├── fixtures/fixtures.ts      # test.extend: injects page objects, re-exports expect
+├── api/                      # API clients: one class per resource, no assertions
+│   ├── AuthClient.ts
+│   └── ProductsClient.ts
+├── fixtures/fixtures.ts      # test.extend: injects page objects + API clients, re-exports expect
+├── data/products.json        # test data for data-driven tests
 ├── tests/
 │   ├── setup/auth.setup.ts   # logs in once, saves playwright/.auth/user.json
-│   ├── ui/                   # UI journeys (login, search, my account)
-│   ├── api/                  # request-fixture tests (search, login)
+│   ├── ui/                   # UI journeys (search showcase, login + search, my account)
+│   ├── api/                  # API tests via the clients (search, login)
 │   ├── hybrid/               # API login → UI check
 │   └── mock/                 # page.route mocked responses
 ├── playwright/.auth/         # saved login state (generated, gitignored)
@@ -88,6 +99,9 @@ npx playwright install --with-deps
 BASEURL=https://practicesoftwaretesting.com
 USER_EMAIL=<demo customer email>
 USER_PASSWORD=<demo customer password>
+API_URL=https://api.practicesoftwaretesting.com
+
+# Other environments: .env.<name>, picked with ENV=<name> (all .env* files are gitignored)
 ```
 
 The demo accounts are listed in the [Toolshop project README](https://github.com/testsmith-io/practice-software-testing).
@@ -96,9 +110,12 @@ The demo accounts are listed in the [Toolshop project README](https://github.com
 
 | Command | What it does |
 | --- | --- |
-| `npx playwright test` | Run everything: setup, API, then UI on Chromium + WebKit |
+| `npm test` | Run everything: setup, API, then UI on Chromium |
+| `npm run test:smoke` | Only `@smoke` tests (setup runs automatically via `dependencies`) |
+| `npm run test:api` | API suite only, no browser login (what CI runs) |
+| `npm run report` | Open the HTML report |
+| `ENV=staging npm test` | Run against another environment (`.env.staging`) |
 | `npx playwright test --project=chromium` | UI on Chromium only (setup runs first) |
-| `npx playwright test tests/api --project=apiTest --no-deps` | API suite only, no browser login (what CI runs) |
 | `npx playwright test --headed` | Watch the browser |
 | `npx playwright test --ui` | Interactive UI mode (on WSL: `--ui-port=8080`) |
 | `npx playwright test --trace on` | Record a full trace |
@@ -110,11 +127,11 @@ The demo accounts are listed in the [Toolshop project README](https://github.com
 
 ## 🧭 Design principles
 
-1. **Layers:** tests → page objects → (fixtures) → config. Tests describe *what*, page objects know *how*.
+1. **Layers:** tests → fixtures → page objects / API clients → config. Tests describe *what*, the layers below know *how*.
 2. **Locators:** role or label first, test ID second, CSS last. Never position-based.
 3. **No sleeps:** auto-wait + web-first assertions. Assertions double as synchronization.
 4. **Independent tests:** every test gets a fresh browser context; tests can run in any order and in parallel.
-5. **Assertions live in tests**, so page objects stay reusable for positive and negative cases.
+5. **Assertions live in tests**, so page objects and API clients stay reusable for positive and negative cases.
 6. **Log in once, set up via API:** UI tests start from saved state; specs that need a logged-out start opt out.
 7. **A green test must be able to go red:** assert real content (not just the URL), and prove it fails without the precondition.
 

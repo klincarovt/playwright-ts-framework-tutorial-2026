@@ -24,6 +24,7 @@ Read `docs/ai/progress.md`: the resume point, step log and weak spots. Continue 
 
 - `docs/me/Day N - Progress.md`: Days 1–5 are filled in. Day 5 holds "Where to improve" and JoJo's next plan. Keep "📘 Learn notes" KISS: tables, diagrams, one-liners.
 - `docs/me/Revision.md`: Part 1 definitions, Part 2 questions, Part 3 decision log, Part 4 project stories + Java/API → Playwright map. Export: `node docs/revision-pdf.js` → `docs/me/Revision.pdf`.
+- `docs/me/Extras - Progress.md`: post-plan topics (describe/hooks, tags, waitForResponse, config per env, data-driven, frames, MCP). Same format as the Day files; tick the status table as each is done.
 - `docs/me/Claude Code Learning.md`: what JoJo learns about Claude Code itself.
 - `/mnt` is a Windows drive: edits may report ENOENT but still apply. Verify before retrying.
 

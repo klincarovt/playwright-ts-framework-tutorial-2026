@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 import { LoginPage } from '../../pages/LoginPage';
 import { SearchPage } from '../../pages/SearchPage';
 
-test('customer finds products when searching "pliers" (old: no fixtures)', async ({ page }) => {
+// Kept as a "before fixtures" reference. Replaced by login-search-fixtures.spec.ts on 2026-11-21 (skipped, not deleted).
+test.skip('customer finds products when searching "pliers" (old: no fixtures)', async ({ page }) => {
 
   await test.step('open the shop', async () => {
 

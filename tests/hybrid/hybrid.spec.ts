@@ -1,19 +1,11 @@
-import { test, expect } from '@playwright/test';
-
-const API = 'https://api.practicesoftwaretesting.com';
+import { test, expect } from '../../fixtures/fixtures';
 
 // Start logged out, so only the API login below can log the UI in
 test.use({ storageState: { cookies: [], origins: [] } });
 
-test('API login lets the UI open My account', async ({ request, page }) => {
+test('API login lets the UI open My account', async ({ authClient, page }) => {
 
-    const response = await request.fetch(`${API}/users/login`, {
-        method: 'POST',
-        data: {
-            email: process.env.USER_EMAIL!,
-            password: process.env.USER_PASSWORD!
-        }
-    });
+    const response = await authClient.login(process.env.USER_EMAIL!, process.env.USER_PASSWORD!);
 
     expect(response.status()).toBe(200);
     const { access_token } = await response.json();

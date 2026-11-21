@@ -369,6 +369,11 @@ Each framework choice as: **problem → solution → why this one.** Interviewer
 | D10 | 3 | `new LoginPage(page)` in every test, no shared setup/cleanup | Custom fixtures (`test.extend`) | vs `beforeEach`: see below |
 | D11 | 3 | UI login in every test: slow, fragile, account locks | Setup project saves `storageState`; browser projects use `dependencies` + `storageState` | Login once; each test still gets its own fresh context (isolation kept) |
 | D12 | 3 | `toHaveURL('/account')` passed even without login (SPA redirects later) | Also assert `page-title` contains "My account"; proved by running with and without storageState | A test must be able to fail; assert content only a logged-in user sees |
+| D13 | S1 | Only an HTML report: CI log shows little, CI tool can't read results | `reporter` array: `list` + `html`, `junit` on CI (`playwright.config.ts:26-28`) | 3 readers: person live, person debugging, CI tool |
+| D15 | S3 | Only one `.env`, no way to switch environment | `ENV=<name>` loads `.env.<name>` (`playwright.config.ts:10-14`), `.gitignore` `.env*` | One switch, no code change; secrets stay out of git. Senior: typed config + fail-fast |
+| D16 | S4 | Specs build API URLs + bodies themselves; endpoint change = fix every spec | `api/ProductsClient.ts`, `api/AuthClient.ts`: one class per resource, returns the response, no assertions | "POM for the API"; the test decides inputs + expectations → positive and negative tests reuse it |
+| D17 | S6+S7 | No grouping, tags, data-driven tests or network sync | `tests/ui/search.spec.ts`: `describe` + `beforeEach`, `@smoke`, loop over `data/products.json`, `waitForResponse` | One spec shows 4 framework skills; data separate from code; assertions on fresh results only |
+| D14 | S2 | Two versions of the same test (old one without fixtures) | `test.skip` + reason, not commented out (`tests/ui/login-search.spec.ts:5-6`) | Stays type-checked, visible as "skipped"; keeps the before/after reference |
 
 ### D10 in detail: why fixtures and not `beforeEach`?
 
@@ -565,6 +570,129 @@ Can't fix it yet → `test.fixme` + ticket.
 
 MCP = **Model Context Protocol**, an open protocol (by Anthropic) for connecting AI to tools. An **MCP server** exposes tools; the AI makes **tool calls**. The Playwright MCP gives the AI a real browser and reads the **accessibility tree** (small, meaningful, matches `getByRole`).
 *"I'd use it to explore and draft tests faster, but I review the output like any PR, and make it fail once on purpose."*
+</details>
+
+## Extras sprint (framework skeleton)
+
+### S1.1 Why 3 reporters on CI (`list`, `html`, `junit`)? 🟡 (read the config right, missed "who uses it")
+📍 `playwright.config.ts:26-28` (`reporter`)
+<details><summary>Answer</summary>
+
+| Reporter | Gives | For whom |
+| --- | --- | --- |
+| `list` | One line per test in the console | Whoever reads the CI log live |
+| `html` | Clickable report with traces/screenshots | A person debugging (downloaded artifact) |
+| `junit` | XML file | The **CI tool** (test tab, history, trends) |
+
+Local: `list` + `html` only. `open: 'never'` = CI doesn't try to open a browser.
+Docs: https://playwright.dev/docs/test-reporters
+</details>
+
+### S1.2 Why XML, and why "JUnit"? 🟡 (asked it himself)
+📍 `playwright.config.ts:27`
+<details><summary>Answer</summary>
+
+**JUnit** = the Java test framework; its **XML report format** became the industry standard. Jenkins, GitLab, Azure DevOps and GitHub test-report actions all read it. XML = machine-readable, fixed structure (tests, pass/fail, time, error).
+*"JUnit XML is the lingua franca of CI test results."*
+</details>
+
+### S1.3 `outputFile: '/playwright-report/junit.xml'`: what's wrong? ❌
+📍 `playwright.config.ts:27`
+<details><summary>Answer</summary>
+
+1. A **leading `/` in a path = filesystem root** (not the project) → permission error on CI. (In `.gitignore`, `/` = repo root. Different rule.)
+2. The `html` reporter **wipes its own folder** → it can delete the JUnit file.
+Fix: `'test-results/junit.xml'` (relative, already gitignored).
+</details>
+
+### S1.4 What does `screenshot: 'only-on-failure'` add if we already have traces? ⬜
+📍 `playwright.config.ts:37`
+<details><summary>Answer</summary>
+
+`trace: 'on-first-retry'` only records **on retry**. A screenshot is attached to **every failure**, so the first failure already shows what the page looked like. Cheap evidence vs. a full trace.
+</details>
+
+### S2.1 You want to keep an old test as a reference. Comment it out, or `test.skip`? ⬜
+📍 `tests/ui/login-search.spec.ts:5-6`
+<details><summary>Answer</summary>
+
+`test.skip` + a comment saying why/when. Commented-out code = "dead code" red flag in reviews, and it rots (no type-check, no lint). `test.skip` stays compiled and shows as **skipped** in the report → visibly a decision. (Or delete it: git history keeps it.)
+Docs: https://playwright.dev/docs/test-annotations#skip-a-test
+</details>
+
+### S3.1 `.gitignore` has `.env`. Is `.env.staging` ignored? ✅ (spotted it, added a line)
+📍 `.gitignore:9`, `playwright.config.ts:11-14`
+<details><summary>Answer</summary>
+
+**No.** `.env` matches only that exact name. Fix with one pattern for all: `.env*` (matches `.env`, `.env.staging`, `.env.prod`). Listing each file works but breaks the day someone adds `.env.dev`.
+Config picks the file: `ENV=staging npx playwright test` → `.env.staging`; no `ENV` → `.env`.
+</details>
+
+### S3.2 A mock test fails only in parallel full runs. What do you do? ⬜
+📍 `tests/mock/mock.spec.ts`
+<details><summary>Answer</summary>
+
+Evidence first: the screenshot/error-context showed the **real API** answered ("45 products found"). Ruled out: URL change (DevTools: `api…/products/search?q=` matches `**/products/search*`), service worker (`serviceWorkers: 'block'` didn't help). Passes alone, with `--workers=1`, and 3/3 on `--repeat-each`. → time-box, next step `--trace on` → Network tab.
+Don't comment out the assertion (green that can't go red). Use `test.fixme` + reason so it's visible as a known issue.
+</details>
+
+### S4.1 Why does an API client return the response instead of asserting inside? ✅
+📍 `api/ProductsClient.ts`
+<details><summary>Answer</summary>
+
+Same rule as page objects: the client only **talks to the API**; the **test decides** what's expected. Then one client serves positive *and* negative tests (expect 200 in one, 400/401/404 in another). Assertions inside would make negative tests impossible.
+</details>
+
+### S4.2 The client method has no `return`. What happens? ❌ (missed it)
+📍 `api/ProductsClient.ts:9`
+<details><summary>Answer</summary>
+
+The method returns `undefined` → the test gets nothing to check. And the request promise is never awaited ("floating promise") → it may not even finish. Fix: `return this.request.get(...)`. ESLint `no-floating-promises` flags it.
+</details>
+
+### S5.1 Why can API tests run without a browser? ⬜ (not answered yet)
+📍 `fixtures/fixtures.ts` (`authClient`, `productsClient` use `request`)
+<details><summary>Answer</summary>
+
+The client fixtures depend on `request` (`APIRequestContext`), not `page`. Fixtures are lazy: Playwright only creates what a test asks for. No `page` requested → no browser launched → fast API tests.
+</details>
+
+### S5.2 `await` inside a fixture gives an error. Why? ✅ (fixed it)
+📍 `fixtures/fixtures.ts:22, 25`
+<details><summary>Answer</summary>
+
+`await` only works inside an `async` function. The fixture arrow function was missing `async`.
+</details>
+
+### S7.1 Why `waitForResponse`, and why start it BEFORE the click? 🟡 (asked "why", got it)
+📍 `tests/ui/search.spec.ts:12-15`
+<details><summary>Answer</summary>
+
+1. Sync on the real event: until the search API answers, the page still shows old (home) products → asserting "a product is visible" could pass on stale UI.
+2. Better failure: "expected 200, got 500" = backend issue, triaged instantly (vs a vague locator timeout).
+Start it **before** the action: the response can arrive in ms; waiting after = may miss it → hangs until timeout. Pattern: `const p = page.waitForResponse(url); await action; const res = await p;`
+Docs: https://playwright.dev/docs/api/class-page#page-wait-for-response
+</details>
+
+### S7.2 `for...in` vs `for...of` over an array? ❌ (used `in`)
+📍 `tests/ui/search.spec.ts:10`
+<details><summary>Answer</summary>
+
+`for...in` → the **keys/indexes** (`"0"`, `"1"`, `"2"`). `for...of` → the **values** (`"pliers"`, …). For arrays: always `for...of`.
+</details>
+
+### S7.3 `import x from 'file.json'` vs `import { x } from ...`? 🟡
+📍 `tests/ui/search.spec.ts:2`, `tsconfig.json` (`resolveJsonModule`)
+<details><summary>Answer</summary>
+
+No braces = the **whole module** (default import), name it anything. Braces = a **named export**, name must match. JSON has no exports → no braces. Needs `"resolveJsonModule": true`.
+</details>
+
+### S7.4 How does Playwright do TestNG's `@DataProvider`? ⬜
+📍 `tests/ui/search.spec.ts:10-11`, `data/products.json`
+<details><summary>Answer</summary>
+
+A `for...of` loop over the data that creates one `test()` per item; the title includes the value (`find results for ${product}`) so each test name is **unique**. Data from JSON keeps data out of code.
 </details>
 
 ## Keywords to fix (Day 5)

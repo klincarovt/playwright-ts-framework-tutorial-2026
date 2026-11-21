@@ -4,6 +4,65 @@ Every change to the framework: config, tests, structure, tooling. Newest first. 
 
 ---
 
+## 2026-11-21 · npm scripts, CI script, README (sprint S8 + S9)
+
+- `package.json`: `test`, `test:smoke` (`--grep @smoke`), `test:api`, `report` (JoJo kept `npx` inside: works, redundant). Verified: smoke 3 + setup passed, api 2 passed.
+- `.github/workflows/playwright.yml:22`: `npm run test:api` (briefly set to `test:smoke` → would fail on CI, UI login blocked; reverted).
+- `README.md` (Claude, chore): API client layer, data-driven/tags, `waitForResponse`, env switch, reporters rows; roadmap; structure (`api/`, `data/`); npm-script commands; layers principle.
+
+---
+
+## 2026-11-21 · Showcase search spec (sprint S6+S7)
+
+- `data/products.json` (`pliers`, `hammer`, `saw`); `tsconfig.json`: `resolveJsonModule`, `include` + `fixtures`, `api`, `data`.
+- `tests/ui/search.spec.ts`: `test.describe` + `beforeEach(goto(''))`, `for...of` over the JSON → 3 tests tagged `@smoke`, `waitForResponse('**/products/search*')` started before the search, status 200 + UI checks. Verified: 3 passed.
+- Bugs on the way: `for...in` (indexes), pattern without trailing `*`, named import from JSON, wrong data path.
+- Interview angle: "Grouping, tags, data-driven and network sync in one readable spec."
+
+---
+
+## 2026-11-21 · API clients as fixtures (sprint S5)
+
+- `fixtures/fixtures.ts`: `authClient` + `productsClient` fixtures (built from `request`).
+- `tests/api/products.spec.ts` and `tests/hybrid/hybrid.spec.ts`: import from fixtures, ask for the client by name; hardcoded `API` consts removed. Login endpoint now lives only in `AuthClient`. Verified: apiTest 2 passed, hybrid 1 passed.
+- Interview angle: "UI and API layers are wired the same way: page objects and API clients both come from fixtures."
+
+---
+
+## 2026-11-21 · API client layer (sprint S4)
+
+- New `api/ProductsClient.ts` (`search(query)` → GET `/products/search` with `params`) and `api/AuthClient.ts` (`login(email, password)` → POST `/users/login`). Both take `APIRequestContext`, return the response, no assertions; base URL from `API_URL` with fallback.
+- Bugs on the way: missing `return` (floating promise), class/file name mismatch, `login()` ignored its parameters (read `process.env` → no negative tests possible).
+- `tests/mock/mock.spec.ts`: `test.use({ serviceWorkers: 'block' })`; intermittent parallel-only failure investigated (real API answered; URL + service worker ruled out), parked.
+- Interview angle: "API clients are the API's page objects."
+
+---
+
+## 2026-11-21 · Env file per environment (sprint S3)
+
+- `playwright.config.ts:10-14`: `ENV=<name>` loads `.env.<name>`, default `.env`. Stray `import { fail }` removed.
+- `.gitignore`: `.env` → `.env*` (covers every env file).
+- `.env`: `API_URL` added (used by the API clients in S4).
+- Interview angle: "One switch picks the environment; senior version = typed config + fail-fast (solo project)."
+
+---
+
+## 2026-11-21 · Old spec skipped, not deleted (sprint S2)
+
+- `tests/ui/login-search.spec.ts:5-6`: `test.skip` + comment (JoJo keeps it as a "before fixtures" reference; Claude applied on request). Chromium run: 5 passed, 1 skipped.
+- Interview angle: "Skipped with a reason instead of commented out: it stays type-checked and shows in the report."
+
+---
+
+## 2026-11-21 · Reporters + screenshots (sprint S1)
+
+- `playwright.config.ts:26-28`: `reporter` = `list` + `html` locally; on CI also `html { open: 'never' }` + `junit` → `test-results/junit.xml`. Verified with `CI=1 npx playwright test --project=apiTest --no-deps` → `test-results/junit.xml` written.
+- `playwright.config.ts:37`: `screenshot: 'only-on-failure'`.
+- Bug on the way: `outputFile: '/test-results/junit.xml'` → `EACCES mkdir '/test-results'` (leading `/` = filesystem root). Fixed to a relative path.
+- Interview angle: "Console for the live log, HTML for debugging, JUnit XML for the CI tool."
+
+---
+
 ## 2026-11-19 · Revision PDF export script
 
 - `docs/revision-pdf.js` (Claude wrote it on request): renders `docs/me/Revision.md` with `marked` (CDN) in Playwright's Chromium, opens every `<details>`, and saves `docs/me/Revision.pdf` via `page.pdf()`. Run: `node docs/revision-pdf.js` (moved from `scripts/` on request; verified working, lint clean).
